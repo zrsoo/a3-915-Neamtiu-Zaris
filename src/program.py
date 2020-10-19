@@ -2,6 +2,12 @@
 # Write the implementation for A3 in this file
 #
 
+# Imports
+
+import math
+
+#
+
 # Font customization
 
 
@@ -109,6 +115,58 @@ def add_complex(li_complex, nr):
     li_complex.append(nr)
 
 
+def complex_modulus(nr_complex):
+    realp = get_realp(nr_complex)
+    imaginaryp = get_imaginaryp(nr_complex)
+
+    modulus = math.sqrt(realp * realp + imaginaryp * imaginaryp)
+
+    return modulus
+
+
+def replace_complex(input_list, li_complex):
+    complex_tbr = create_complex(input_list[1])
+    complex_rpm = create_complex(input_list[3])
+    if complex_tbr not in li_complex:
+        raise IndexError
+    li_complex = [element if element != complex_tbr else complex_rpm for element in li_complex]
+    return li_complex
+
+
+def remove_multiple(input_list, li_complex):
+    sindex = int(input_list[1])
+    eindex = int(input_list[3])
+    nrpops = eindex - sindex + 1
+
+    if sindex > eindex or sindex < 0 or eindex > len(li_complex):
+        raise ValueError
+
+    for index in range(0, nrpops):
+        li_complex.pop(sindex - 1)
+
+    return eindex, sindex
+
+
+def remove_single(input_list, li_complex):
+    index = int(input_list[1])
+    li_complex.pop(index - 1)
+    return index
+
+
+def insert_complex(input_list, li_complex):
+    nr = create_complex(input_list[1])
+
+    index = int(input_list[3])
+
+    if input_list[2] != "at":
+        raise ValueError
+    if index < 0 or index > len(li_complex) + 1:
+        raise IndexError
+    li_complex.insert(index - 1, nr)
+
+    return index
+
+
 # UI section
 # (all functions that have input or print statements, or that CALL functions with print / input are  here).
 # Ideally, this section should not contain any calculations relevant to program functionalities
@@ -169,7 +227,7 @@ def print_list(li_complex):
 def start():
     """Control function"""
 
-    print_menu()  # Printing the user menu
+    print_menu()
 
     # Testing
     li_complex = []
@@ -207,16 +265,7 @@ def start():
         elif command == "insert":
 
             try:
-                nr = create_complex(input_list[1])
-                index = int(input_list[3])
-
-                if input_list[2] != "at":
-                    raise ValueError
-
-                if index < 0 or index > len(li_complex) + 1:
-                    raise IndexError
-
-                li_complex.insert(index - 1, nr)
+                index = insert_complex(input_list, li_complex)
 
                 print("You have successfully inserted your complex number at position " + str(index) + ".")
             except ValueError:
@@ -228,39 +277,16 @@ def start():
             try:
                 nr_cmds = len(input_list)
 
-                if nr_cmds == 2:
-
-                    index = int(input_list[1])
-                    li_complex.pop(index - 1)
-
-                    print("You have successfully removed the complex number at position " + str(index))
-
-                elif nr_cmds == 4:
-
-                    sindex = int(input_list[1])
-                    eindex = int(input_list[3])
-                    nrpops = eindex - sindex + 1
-
-                    for index in range(0, nrpops):
-                        li_complex.pop(sindex - 1)
-
-                    print("You have successfully removed the complex numbers from "
-                          "position " + str(sindex) + " to position " + str(eindex))
+                do_remove(input_list, li_complex, nr_cmds)
             except ValueError:
-                print("You did not type an index!")
+                print("The indexes you have typed are of incorrect form!")
             except IndexError:
-                print("The index you have typed is out of range")
+                print("The index you have typed is out of range!")
 
         elif command == "replace":
 
             try:
-                complex_tbr = create_complex(input_list[1])
-                complex_rpm = create_complex(input_list[3])
-
-                if complex_tbr not in li_complex:
-                    raise IndexError
-
-                li_complex = [element if element != complex_tbr else complex_rpm for element in li_complex]
+                li_complex = replace_complex(input_list, li_complex)
 
                 print("You have successfully performed the operation!")
             except ValueError:
@@ -272,34 +298,85 @@ def start():
 
             nr_cmds = len(input_list)
 
-            if nr_cmds == 1:
-                print(yellow + "\nThe list of complex numbers is: " + endc)
-                print_list(li_complex)
+            try:
+                do_list(input_list, li_complex, nr_cmds)
 
-            elif nr_cmds == 5:
-                try:
-                    if input_list[1] != "real" or input_list[3] != "to":
-                        raise ValueError
-
-                    spos = int(input_list[2]) - 1
-                    epos = int(input_list[4]) - 1
-
-                    if spos < 0 or epos > len(li_complex):
-                        raise IndexError
-
-                    for index in range(spos, epos + 1):
-                        if get_imaginaryp(li_complex[index]) == 0:
-                            print_complex(li_complex[index])
-                except ValueError:
-                    print("The command you have entered is not of correct form!")
-                except IndexError:
-                    print("The indexes you have typed are out of range!")
-
+            except ValueError:
+                print("The command you have entered is not of correct form!")
+            except IndexError:
+                print("The indexes you have typed are out of range!")
 
         elif command == "exit":
             return
 
     #
+
+
+def do_remove(input_list, li_complex, nr_cmds):
+    if nr_cmds == 2:
+
+        index = remove_single(input_list, li_complex)
+        print("You have successfully removed the complex number at position " + str(index))
+
+    elif nr_cmds == 4:
+
+        eindex, sindex = remove_multiple(input_list, li_complex)
+
+        print("You have successfully removed the complex numbers from "
+              "position " + str(sindex) + " to position " + str(eindex))
+
+
+def do_list(input_list, li_complex, nr_cmds):
+    if nr_cmds == 1:  # If the command is "list"
+        print(yellow + "\nThe list of complex numbers is: " + endc)
+        print_list(li_complex)
+
+    elif nr_cmds == 5:  # If the command is "list real "x" to "y"
+
+        list_real(input_list, li_complex)
+
+    else:  # If the command is "list modulo '' x"
+
+        list_modulus(input_list, li_complex)
+
+
+def list_modulus(input_list, li_complex):
+    comp = int(input_list[3])
+    sgn = input_list[2]
+    exists = False
+    if sgn == "<":
+        for nr in li_complex:
+            if complex_modulus(nr) < comp:
+                print_complex(nr)
+                exists = True
+    elif sgn == "=":
+        for nr in li_complex:
+            if complex_modulus(nr) == comp:
+                print_complex(nr)
+                exists = True
+    elif sgn == ">":
+        for nr in li_complex:
+            if complex_modulus(nr) > comp:
+                print_complex(nr)
+                exists = True
+    if not exists:
+        print("The list does not contain any number with the specified property.")
+
+
+def list_real(input_list, li_complex):
+    if input_list[1] != "real" or input_list[3] != "to":
+        raise ValueError
+    spos = int(input_list[2]) - 1
+    epos = int(input_list[4]) - 1
+    exists = False
+    if spos < 0 or epos > len(li_complex):
+        raise IndexError
+    for index in range(spos, epos + 1):
+        if get_imaginaryp(li_complex[index]) == 0:
+            print_complex(li_complex[index])
+            exists = True
+    if not exists:
+        print("The list does not contain any real numbers in that interval.")
 
 
 # Test functions go here
@@ -314,11 +391,34 @@ def test_init(li_complex):
 
     li_append(li_complex)
 
-    # Add function
+    # Add
     add_complex(li_complex, [2, -7])
     assert len(li_complex) == 10
     #
 
+    # Insert
+    insert_complex(["insert", "1+200i", "at", "3"], li_complex)
+    assert li_complex[2] == [1, 200]
+    assert len(li_complex) == 11
+    #
+
+    # Remove single
+    remove_single(["remove", 3], li_complex)
+    assert len(li_complex) == 10
+    #
+
+    # Remove multiple
+    add_complex(li_complex, [1, 1])
+    add_complex(li_complex, [1, 1])
+    add_complex(li_complex, [1, 1])
+    remove_multiple(["remove", 11, "to", 13], li_complex)
+    assert len(li_complex) == 10
+    #
+
+    # Replace
+    assert li_complex[5] == [10, 0]
+    li_complex = replace_complex(["replace", "10+0i", "with", "12+0i"], li_complex)
+    assert li_complex[5] == [12, 0]
     #
 
 
