@@ -313,12 +313,12 @@ def start():
 
 
 def do_remove(input_list, li_complex, nr_cmds):
-    if nr_cmds == 2:
+    if nr_cmds == 2:  # if command is "remove x"
 
         index = remove_single(input_list, li_complex)
         print("You have successfully removed the complex number at position " + str(index))
 
-    elif nr_cmds == 4:
+    elif nr_cmds == 4:  # if command is "remove x to y"
 
         eindex, sindex = remove_multiple(input_list, li_complex)
 
@@ -392,34 +392,54 @@ def test_init(li_complex):
     li_append(li_complex)
 
     # Add
-    add_complex(li_complex, [2, -7])
-    assert len(li_complex) == 10
+    test_add(li_complex)
     #
 
     # Insert
-    insert_complex(["insert", "1+200i", "at", "3"], li_complex)
-    assert li_complex[2] == [1, 200]
-    assert len(li_complex) == 11
+    test_insert(li_complex)
     #
 
     # Remove single
-    remove_single(["remove", 3], li_complex)
-    assert len(li_complex) == 10
+    test_remove_single(li_complex)
     #
 
     # Remove multiple
+    test_remove_multiple(li_complex)
+    #
+
+    # Replace
+    test_replace(li_complex)
+    #
+
+
+def test_replace(li_complex):
+    assert li_complex[5] == [10, 0]
+    li_complex = replace_complex(["replace", "10+0i", "with", "12+0i"], li_complex)
+    assert li_complex[5] == [12, 0]
+
+
+def test_remove_multiple(li_complex):
     add_complex(li_complex, [1, 1])
     add_complex(li_complex, [1, 1])
     add_complex(li_complex, [1, 1])
     remove_multiple(["remove", 11, "to", 13], li_complex)
     assert len(li_complex) == 10
-    #
 
-    # Replace
-    assert li_complex[5] == [10, 0]
-    li_complex = replace_complex(["replace", "10+0i", "with", "12+0i"], li_complex)
-    assert li_complex[5] == [12, 0]
-    #
+
+def test_remove_single(li_complex):
+    remove_single(["remove", 3], li_complex)
+    assert len(li_complex) == 10
+
+
+def test_insert(li_complex):
+    insert_complex(["insert", "1+200i", "at", "3"], li_complex)
+    assert li_complex[2] == [1, 200]
+    assert len(li_complex) == 11
+
+
+def test_add(li_complex):
+    add_complex(li_complex, [2, -7])
+    assert len(li_complex) == 10
 
 
 def li_append(li_complex):
